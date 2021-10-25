@@ -1,4 +1,4 @@
-module git.catddm.com/yixing/lib
+module github.com/zyx134/golib
 
 go 1.15
 
