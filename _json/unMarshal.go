@@ -2,7 +2,8 @@ package _json
 
 import (
 	"encoding/json"
-	"git.catddm.com/yixing/lib/_string"
+
+	"github.com/zyx134/golib/_string"
 )
 
 func ByteUnMarshal(b []byte, ret *map[string]interface{}) {

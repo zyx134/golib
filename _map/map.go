@@ -1,7 +1,7 @@
 package _map
 
 import (
-	"git.catddm.com/yixing/lib/_reflect"
+	"github.com/zyx134/golib/_reflect"
 )
 
 //map比较

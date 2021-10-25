@@ -1,9 +1,10 @@
 package _string
 
 import (
-	"git.catddm.com/yixing/lib/_int"
-	"git.catddm.com/yixing/lib/_time"
 	"time"
+
+	"github.com/zyx134/golib/_int"
+	"github.com/zyx134/golib/_time"
 )
 
 //字符串转时间

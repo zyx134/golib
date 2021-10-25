@@ -1,6 +1,6 @@
 package _time
 
-import "git.catddm.com/yixing/lib/_int"
+import "github.com/zyx134/golib/_int"
 
 //获取时间戳 int32
 func Stamp32() (timestamp int) {

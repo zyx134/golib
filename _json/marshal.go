@@ -2,7 +2,8 @@ package _json
 
 import (
 	"encoding/json"
-	"git.catddm.com/yixing/lib/_byte"
+
+	"github.com/zyx134/golib/_byte"
 )
 
 func ToJsonByte(data interface{}) ([]byte, error) {
