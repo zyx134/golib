@@ -16,7 +16,7 @@ var (
 	RedisConn *redis.Pool
 )
 
-func Init(viper *viper.Viper) error {
+func Init(viper *viper.Viper) *redis.Pool {
 	host := viper.GetString("redis.host")
 	port := viper.GetInt("redis.port")
 	RedisConn = &redis.Pool{
@@ -46,11 +46,11 @@ func Init(viper *viper.Viper) error {
 			return err
 		},
 	}
-	return nil
+	return RedisConn
 }
 func Exists(key string) bool {
 	conn := RedisConn.Get()
-	// defer conn.Close()
+	defer conn.Close()
 
 	exists, err := redis.Bool(conn.Do("EXISTS", key))
 	if err != nil {
@@ -62,14 +62,14 @@ func Exists(key string) bool {
 
 func Delete(key string) (bool, error) {
 	conn := RedisConn.Get()
-	// defer conn.Close()
+	defer conn.Close()
 
 	return redis.Bool(conn.Do("DEL", key))
 }
 
 func LikeDeletes(key string) error {
 	conn := RedisConn.Get()
-	// defer conn.Close()
+	defer conn.Close()
 
 	keys, err := redis.Strings(conn.Do("KEYS", "*"+key+"*"))
 	if err != nil {
