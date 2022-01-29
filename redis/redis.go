@@ -10,28 +10,38 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-func New(host, password, db string, port, maxIdle, maxActive int, idleTimeout time.Duration) *redis.Pool {
+type Config struct {
+	Host      string
+	Password  string
+	Db        string
+	Port      int
+	MaxIdle   int
+	MaxActive int
+	Timeout   time.Duration
+}
+
+func New(c Config) *redis.Pool {
 	r := new(redis.Pool)
-	r.MaxIdle = maxIdle
-	r.MaxActive = maxActive
-	r.IdleTimeout = idleTimeout
+	r.MaxIdle = c.MaxIdle
+	r.MaxActive = c.MaxActive
+	r.IdleTimeout = c.Timeout
 	r.Dial = func() (redis.Conn, error) {
-		c, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+		cc, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", c.Host, c.Port))
 		if err != nil {
 			return nil, err
 		}
-		if password != "" {
-			if _, err := c.Do("AUTH", password); err != nil {
-				c.Close()
+		if c.Password != "" {
+			if _, err := cc.Do("AUTH", c.Password); err != nil {
+				cc.Close()
 				return nil, err
 			}
 		}
-		_, err = c.Do("SELECT", db)
+		_, err = cc.Do("SELECT", c.Db)
 		if err != nil {
-			c.Close()
+			cc.Close()
 			return nil, err
 		}
-		return c, err
+		return cc, err
 	}
 	r.TestOnBorrow = func(c redis.Conn, t time.Time) error {
 		_, err := c.Do("PING")
