@@ -5,51 +5,43 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/zyx134/golib/_string"
 
 	"github.com/gomodule/redigo/redis"
 )
 
-var (
-	RedisConn *redis.Pool
-)
-
-func Init(viper *viper.Viper) *redis.Pool {
-	host := viper.GetString("redis.host")
-	port := viper.GetInt("redis.port")
-	RedisConn = &redis.Pool{
-		MaxIdle:     viper.GetInt("redis.maxIdle"),
-		MaxActive:   viper.GetInt("redis.maxActive"),
-		IdleTimeout: viper.GetDuration("redis.idleTimeout"),
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
-			if err != nil {
-				return nil, err
-			}
-			if viper.GetString("redis.password") != "" {
-				if _, err := c.Do("AUTH", viper.GetString("redis.password")); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
-			_, err = c.Do("SELECT", viper.GetString("redis.db"))
-			if err != nil {
+func New(host, password, db string, port, maxIdle, maxActive int, idleTimeout time.Duration) *redis.Pool {
+	r := new(redis.Pool)
+	r.MaxIdle = maxIdle
+	r.MaxActive = maxActive
+	r.IdleTimeout = idleTimeout
+	r.Dial = func() (redis.Conn, error) {
+		c, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+		if err != nil {
+			return nil, err
+		}
+		if password != "" {
+			if _, err := c.Do("AUTH", password); err != nil {
 				c.Close()
 				return nil, err
 			}
-			return c, err
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
+		}
+		_, err = c.Do("SELECT", db)
+		if err != nil {
+			c.Close()
+			return nil, err
+		}
+		return c, err
 	}
-	return RedisConn
+	r.TestOnBorrow = func(c redis.Conn, t time.Time) error {
+		_, err := c.Do("PING")
+		return err
+	}
+
+	return r
 }
-func Exists(key string) bool {
-	conn := RedisConn.Get()
+func Exists(r *redis.Pool, key string) bool {
+	conn := r.Get()
 	defer conn.Close()
 
 	exists, err := redis.Bool(conn.Do("EXISTS", key))
@@ -60,15 +52,15 @@ func Exists(key string) bool {
 	return exists
 }
 
-func Delete(key string) (bool, error) {
-	conn := RedisConn.Get()
+func Delete(r *redis.Pool, key string) (bool, error) {
+	conn := r.Get()
 	defer conn.Close()
 
 	return redis.Bool(conn.Do("DEL", key))
 }
 
-func LikeDeletes(key string) error {
-	conn := RedisConn.Get()
+func LikeDeletes(r *redis.Pool, key string) error {
+	conn := r.Get()
 	defer conn.Close()
 
 	keys, err := redis.Strings(conn.Do("KEYS", "*"+key+"*"))
@@ -77,7 +69,7 @@ func LikeDeletes(key string) error {
 	}
 
 	for _, key := range keys {
-		_, err = Delete(key)
+		_, err = Delete(r, key)
 		if err != nil {
 			return err
 		}
@@ -85,8 +77,8 @@ func LikeDeletes(key string) error {
 
 	return nil
 }
-func Set(key string, data interface{}, time int) (bool, error) {
-	conn := RedisConn.Get()
+func Set(r *redis.Pool, key string, data interface{}, time int) (bool, error) {
+	conn := r.Get()
 	defer conn.Close()
 
 	value, err := json.Marshal(data)
@@ -103,8 +95,8 @@ func Set(key string, data interface{}, time int) (bool, error) {
 	return true, err
 }
 
-func Get(key string) (string, error) {
-	conn := RedisConn.Get()
+func Get(r *redis.Pool, key string) (string, error) {
+	conn := r.Get()
 	defer conn.Close()
 
 	reply, err := redis.String(conn.Do("GET", key))
@@ -114,16 +106,16 @@ func Get(key string) (string, error) {
 
 	return reply, nil
 }
-func SetInt(key string, data int, time int) (bool, error) {
-	conn := RedisConn.Get()
+func SetInt(r *redis.Pool, key string, data int, time int) (bool, error) {
+	conn := r.Get()
 	defer conn.Close()
 	reply, err := redis.Bool(conn.Do("SET", key, data))
 	conn.Do("EXPIRE", key, time)
 
 	return reply, err
 }
-func GetInt(key string) (ret int, err error) {
-	s, err := Get(key)
+func GetInt(r *redis.Pool, key string) (ret int, err error) {
+	s, err := Get(r, key)
 	if err != nil {
 		return
 	}

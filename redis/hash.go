@@ -19,8 +19,8 @@ import (
 // hgetall(key)：返回名称为key的hash中所有的键（field）及其对应的value
 
 // "test","e",1
-func HashSet(key, field string, value interface{}) error {
-	conn := RedisConn.Get()
+func HashSet(r *redis.Pool, key, field string, value interface{}) error {
+	conn := r.Get()
 	defer conn.Close()
 	_, err := conn.Do("hset", key, field, value)
 	if err != nil {
@@ -30,8 +30,8 @@ func HashSet(key, field string, value interface{}) error {
 }
 
 // "test","a"
-func HashGet(key, field string) (b []byte, err error) {
-	conn := RedisConn.Get()
+func HashGet(r *redis.Pool, key, field string) (b []byte, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := conn.Do("hget", key, field)
 	if err != nil {
@@ -45,8 +45,8 @@ func HashGet(key, field string) (b []byte, err error) {
 }
 
 // "test","a"
-func HashGetString(key, field string) (string, error) {
-	b, err := HashGet(key, field)
+func HashGetString(r *redis.Pool, key, field string) (string, error) {
+	b, err := HashGet(r, key, field)
 	if err != nil {
 		return "", err
 	}
@@ -55,8 +55,8 @@ func HashGetString(key, field string) (string, error) {
 
 //values 是由 key, k,v,k,v组成
 // "test", "a", "aa"
-func HashMset(values ...interface{}) error {
-	conn := RedisConn.Get()
+func HashMset(r *redis.Pool, values ...interface{}) error {
+	conn := r.Get()
 	defer conn.Close()
 	_, err := conn.Do("hmset", values...)
 	if err != nil {
@@ -68,8 +68,8 @@ func HashMset(values ...interface{}) error {
 //values 是由 key, k,k,k组成
 //输入 "test", "a", "b","c"
 //输出
-func HashMget(values ...interface{}) (b []interface{}, err error) {
-	conn := RedisConn.Get()
+func HashMget(r *redis.Pool, values ...interface{}) (b []interface{}, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := redis.Values(conn.Do("hmget", values...))
 	if err != nil {
@@ -81,8 +81,8 @@ func HashMget(values ...interface{}) (b []interface{}, err error) {
 //values 是由 key, k,k,k组成
 //输入 "test", "a", "b","c"
 //输出 ["aa","bb","cc"]
-func HashMgetString(values ...interface{}) (b []string, err error) {
-	conn := RedisConn.Get()
+func HashMgetString(r *redis.Pool, values ...interface{}) (b []string, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := redis.Values(conn.Do("hmget", values...))
 	if err != nil {
@@ -104,8 +104,8 @@ func HashMgetString(values ...interface{}) (b []string, err error) {
 // "cc": "cc",
 // "e": "3"
 // }
-func HashMgetMapString(values ...interface{}) (b map[string]string, err error) {
-	conn := RedisConn.Get()
+func HashMgetMapString(r *redis.Pool, values ...interface{}) (b map[string]string, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := redis.Values(conn.Do("hmget", values...))
 	if err != nil {
@@ -126,8 +126,8 @@ func HashMgetMapString(values ...interface{}) (b map[string]string, err error) {
 //判断field是否存在
 //输入 "test", "a"
 //输出 true or false
-func HashHexists(key, field string) (ok bool) {
-	conn := RedisConn.Get()
+func HashHexists(r *redis.Pool, key, field string) (ok bool) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := conn.Do("hexists", key, field)
 	if err != nil {
@@ -144,8 +144,8 @@ func HashHexists(key, field string) (ok bool) {
 //若field不存在，则新增field,value=incr
 //输入 "test", "e",2
 //输出 true or false
-func HashHincrby(key, field string, incr int) (err error) {
-	conn := RedisConn.Get()
+func HashHincrby(r *redis.Pool, key, field string, incr int) (err error) {
+	conn := r.Get()
 	defer conn.Close()
 	_, err = conn.Do("hincrby", key, field, incr)
 	if err != nil {
@@ -157,8 +157,8 @@ func HashHincrby(key, field string, incr int) (err error) {
 //删除field
 //删除不存在的field不会报错
 //输入 "test", "e"
-func HashHdel(key, field string) (err error) {
-	conn := RedisConn.Get()
+func HashHdel(r *redis.Pool, key, field string) (err error) {
+	conn := r.Get()
 	defer conn.Close()
 	_, err = conn.Do("hdel", key, field)
 	if err != nil {
@@ -169,8 +169,8 @@ func HashHdel(key, field string) (err error) {
 
 //获取key的field长度
 //输入 "test"
-func HashHlen(key string) (l int64, err error) {
-	conn := RedisConn.Get()
+func HashHlen(r *redis.Pool, key string) (l int64, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := conn.Do("hlen", key)
 	if err != nil {
@@ -182,8 +182,8 @@ func HashHlen(key string) (l int64, err error) {
 
 //获取key的所有field
 //输入 "test"
-func HashHkeys(key string) (l []string, err error) {
-	conn := RedisConn.Get()
+func HashHkeys(r *redis.Pool, key string) (l []string, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := redis.Values(conn.Do("hkeys", key))
 	if err != nil {
@@ -199,8 +199,8 @@ func HashHkeys(key string) (l []string, err error) {
 
 //获取key的所有field的value
 //输入 "test"
-func HashHvals(key string) (l []string, err error) {
-	conn := RedisConn.Get()
+func HashHvals(r *redis.Pool, key string) (l []string, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err := redis.Values(conn.Do("hvals", key))
 	if err != nil {
@@ -216,8 +216,8 @@ func HashHvals(key string) (l []string, err error) {
 
 //获取key的全部数据
 //输入 "test"
-func HashHgetallMapStringString(key string) (res map[string]string, err error) {
-	conn := RedisConn.Get()
+func HashHgetallMapStringString(r *redis.Pool, key string) (res map[string]string, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err = redis.StringMap(conn.Do("hgetall", key))
 	if err != nil {
@@ -228,8 +228,8 @@ func HashHgetallMapStringString(key string) (res map[string]string, err error) {
 
 //获取key的全部数据
 //输入 "test"
-func HashHgetallMapStringInt(key string) (res map[string]int, err error) {
-	conn := RedisConn.Get()
+func HashHgetallMapStringInt(r *redis.Pool, key string) (res map[string]int, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	res, err = redis.IntMap(conn.Do("hgetall", key))
 	if err != nil {

@@ -23,8 +23,8 @@ func (z ZsetList) Swap(i, j int) {
 }
 
 //设置
-func ZsetSet(key, value string, score int) error {
-	conn := RedisConn.Get()
+func ZsetSet(r *redis.Pool, key, value string, score int) error {
+	conn := r.Get()
 	defer conn.Close()
 	_, err := conn.Do("ZADD", key, INCR, score, value)
 	if err != nil {
@@ -34,8 +34,8 @@ func ZsetSet(key, value string, score int) error {
 }
 
 //设置 同时自增1
-func ZsetSetInccr1(key, value string, score int) error {
-	conn := RedisConn.Get()
+func ZsetSetInccr1(r *redis.Pool, key, value string, score int) error {
+	conn := r.Get()
 	defer conn.Close()
 	_, err := conn.Do("ZADD", key, INCR, 1, value)
 	if err != nil {
@@ -46,8 +46,8 @@ func ZsetSetInccr1(key, value string, score int) error {
 
 //获取
 //从低到高
-func ZsetSetGetASC(key string, start, end int) (list ZsetList, err error) {
-	conn := RedisConn.Get()
+func ZsetSetGetASC(r *redis.Pool, key string, start, end int) (list ZsetList, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	m, err := redis.IntMap(conn.Do("ZRANGE", key, start, end, "withscores"))
 	if err != nil {
@@ -64,8 +64,8 @@ func ZsetSetGetASC(key string, start, end int) (list ZsetList, err error) {
 
 //获取
 //从高到低
-func ZsetSetGetDESC(key string, start, end int) (list ZsetList, err error) {
-	conn := RedisConn.Get()
+func ZsetSetGetDESC(r *redis.Pool, key string, start, end int) (list ZsetList, err error) {
+	conn := r.Get()
 	defer conn.Close()
 	m, err := redis.IntMap(conn.Do("ZREVRANGE", key, start, end, "withscores"))
 	if err != nil {
