@@ -15,6 +15,17 @@ func (p *Pool) SetSet(key, value string) error {
 	return nil
 }
 
+//设置
+func (p *Pool) SetSetAndExpire(key, value string) error {
+	conn := p.pool.Get()
+	defer conn.Close()
+	_, err := conn.Do("SADD", key, value)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //判断是否存在
 func (p *Pool) SetExist(key, value string) bool {
 	conn := p.pool.Get()
@@ -43,4 +54,12 @@ func (p *Pool) SetDel(key, value string) error {
 	defer conn.Close()
 	_, err := conn.Do("SREM", key, value)
 	return err
+}
+
+//随机删除
+func (p *Pool) SetPop(key string, count int) []string {
+	conn := p.pool.Get()
+	defer conn.Close()
+	res, _ := redis.Strings(conn.Do("SPOP", key, count))
+	return res
 }
