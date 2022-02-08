@@ -7,8 +7,6 @@ import (
 
 func TestSet(t *testing.T) {
 	p := New(Config{
-		Host:      "www.catddm.com",
-		Password:  "angelkiss",
 		Db:        "2",
 		Port:      9999,
 		MaxIdle:   10,
