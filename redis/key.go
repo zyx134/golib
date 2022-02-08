@@ -2,6 +2,15 @@ package redis
 
 import "github.com/gomodule/redigo/redis"
 
+func (p *Pool) KeyExpire(key string, time int) (bool, error) {
+	conn := p.pool.Get()
+	defer conn.Close()
+	_, err := conn.Do("EXPIRE", key, time)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
 func (p *Pool) KeyExists(key string) bool {
 	conn := p.pool.Get()
 	defer conn.Close()

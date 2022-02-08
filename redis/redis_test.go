@@ -1,13 +1,14 @@
 package redis
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
 
 func TestSet(t *testing.T) {
 	p := New(Config{
+		Host:      "www.catddm.com",
+		Password:  "angelkiss",
 		Db:        "2",
 		Port:      9999,
 		MaxIdle:   10,
@@ -24,6 +25,6 @@ func TestSet(t *testing.T) {
 	// fmt.Println("是否存在", p.SetExist("test:test", "tt"))
 	// fmt.Println("del", p.SetDel("test:test", "tt"))
 	// fmt.Println("all", p.SetGetAll("test:test"))
-	fmt.Print("pop", p.SetPop("test:test", 2))
-
+	// fmt.Print("pop", p.SetPop("test:test", 2))
+	p.StringSet("abc", 1, 111)
 }
