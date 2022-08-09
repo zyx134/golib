@@ -6,8 +6,17 @@ import (
 	"time"
 )
 
+var (
+	DefaultFormat = "2006-01-02 15:04:05"
+	DayFormat     = "2006-01-02"
+	DayFormat1    = "2006/01/02"
+	MonthFormat   = "2006-01"
+	TzFormat      = "2006-01-02T15:04:05Z"
+	TFormat       = "2006-01-02T15:04:05+08:00"
+)
+
 // WeekStartDay set week start day, default is sunday
-var WeekStartDay = time.Sunday
+var WeekStartDay = time.Monday
 
 // TimeFormats default time formats will be parsed as
 var TimeFormats = []string{"_1/2/2006", "_1/2/2006 15:4:5", "2006", "2006-_1", "2006-_1-2", "2006-_1-2 15", "2006-_1-2 15:4", "2006-_1-2 15:4:5", "_1-2", "15:4:5", "15:4", "15", "15:4:5 Jan 2, 2006 MST", "2006-01-02 15:04:05.999999999 -0700 MST", "2006-01-02T15:04:05-07:00"}
